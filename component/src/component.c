@@ -4,17 +4,14 @@
 #include "mxc_delay.h"
 #include "mxc_errors.h"
 #include "nvic_table.h"
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
 
 
 #include "simple_i2c_peripheral.h"
 #include "board_link.h"
-
-#include <wolfssl/options.h>
-#include <wolfssl/openssl/aes.h>
-#include <wolfssl/openssl/evp.h>
 
 #ifdef CRYPTO_EXAMPLE
 #include "simple_crypto.h"
@@ -101,7 +98,7 @@ void secure_send(uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 int secure_receive(uint8_t* buffer) {
-    uint8_t key[16]=sunu_thiaabi;
+    uint8_t key[17]=sunu_thiaabi;
      // Receive the encrypted data over I2C
      int received = wait_and_receive_packet(buffer);
      if (received == ERROR_RETURN) {
@@ -110,7 +107,7 @@ int secure_receive(uint8_t* buffer) {
      }
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,64, key, decrypted_data);
+     decrypt_sym(buffer,16, key, decrypted_data);
 
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
@@ -205,37 +202,55 @@ void process_validate() {
     send_packet_and_ack(sizeof(validate_message), transmit_buffer);
 }
 
-//  void hexstr_to_bytes(const char *hexstr, unsigned char *bytes) {
-//     int i;
-//     for (i = 0; i < strlen(hexstr) / 2; ++i) {
-//         sscanf(hexstr + 2*i, "%2hhx", &bytes[i]);
-//     }
-//  }
+
+
+// Substitution table
+const char substitution_table[93][2] = {
+    {1, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'd'}, {5, 'e'}, {6, 'f'}, {7, 'g'}, {8, 'h'}, {9, 'i'}, {10, 'j'},
+    {11, 'k'}, {12, 'l'}, {13, 'm'}, {14, 'n'}, {15, 'o'}, {16, 'p'}, {17, 'q'}, {18, 'r'}, {19, 's'}, {20, 't'},
+    {21, 'u'}, {22, 'v'}, {23, 'w'}, {24, 'x'}, {25, 'y'}, {26, 'z'}, {27, 'A'}, {28, 'B'}, {29, 'C'}, {30, 'D'},
+    {31, 'E'}, {32, 'F'}, {33, 'G'}, {34, 'H'}, {35, 'I'}, {36, 'J'}, {37, 'K'}, {38, 'L'}, {39, 'M'}, {40, 'N'},
+    {41, 'O'}, {42, 'P'}, {43, 'Q'}, {44, 'R'}, {45, 'S'}, {46, 'T'}, {47, 'U'}, {48, 'V'}, {49, 'W'}, {50, 'X'},
+    {51, 'Y'}, {52, 'Z'}, {53, '0'}, {54, '1'}, {55, '2'}, {56, '3'}, {57, '4'}, {58, '5'}, {59, '6'}, {60, '7'},
+    {61, '8'}, {62, '9'}, {63, '!'}, {64, '?'}, {65, '.'}, {66, ','}, {67, ';'}, {68, ':'}, {69, '"'}, {70, '\''},
+    {71, '('}, {72, ')'}, {73, '['}, {74, ']'}, {75, '{'}, {76, '}'}, {77, '<'}, {78, '>'}, {79, '/'}, {80, '\\'},
+    {81, '|'}, {82, '+'}, {83, '-'}, {84, '_'}, {85, '='}, {86, '*'}, {87, '&'}, {88, '^'}, {89, '%'}, {90, '$'},
+    {91, '#'}, {92, '@'}, {93, ' '}
+};
+
+// Function to decrypt the message
+void decrypt_message(const char* encrypted_message, char* decrypted_message) {
+    int i = 0;
+    char *token;
+    char *rest = strdup(encrypted_message);
+    
+    while ((token = strtok_r(rest, "-", &rest))) {
+        if (atoi(token) > 0 && atoi(token) <= 93) {
+            decrypted_message[i++] = substitution_table[atoi(token)-1][1];
+        } else {
+            decrypted_message[i++] = *token;
+        }
+    }
+    decrypted_message[i] = '\0';
+}
 void process_attest() {
-    unsigned char key[] = sunu_thiaabi; // 16 bytes for AES-128
-    const char *hex_loc = ATTESTATION_LOC;
-    const char *hex_date = ATTESTATION_DATE;
-    const char *hex_cust = ATTESTATION_CUSTOMER;
-    // unsigned char *by_loc;
-    // unsigned char *by_date;
-    // unsigned char *by_cust; 
+    
+    const char* L = ATTESTATION_LOC;
+    const char* D = ATTESTATION_DATE;
+    const char* C = ATTESTATION_CUSTOMER;
 
-    unsigned char plainL[]; // Taille du texte en clair
-    unsigned char plainD[]; // Taille du texte en clair
-    unsigned char plainC[]; // Taille du texte en clair
-
-    // // Convertir la chaîne hexadécimale en tableau d'octets
-    // hexstr_to_bytes(hex_loc, by_loc);
-    // hexstr_to_bytes(hex_date, by_date);
-    // hexstr_to_bytes(hex_cust, by_cust);
-
-    decrypt_sym(hex_loc, 64, key, plainL);
-    decrypt_sym(hex_date, 64, key, plainD);
-    decrypt_sym(hex_cust, 64, key, plainC);
-   
+    // Decrypt the message
+    char DL[65]; // Adjust the size accordingly
+    // Decrypt the message
+    char DD[65]; // Adjust the size accordingly
+    // Decrypt the message
+    char DC[65]; // Adjust the size accordingly
+    decrypt_message(L, DL);
+    decrypt_message(D, DD);
+    decrypt_message(C, DC);
+    
     // The AP requested attestation. Respond with the attestation data
-    uint8_t len = sprintf((char*)transmit_buffer, "LOC>%s\nDATE>%s\nCUST>%s\n",
-                plainL, plainD, plainC); + 1;
+    uint8_t len = sprintf((char*)transmit_buffer, "LOC>%s\nDATE>%s\nCUST>%s\n",DL, DD, DC) + 1;
     send_packet_and_ack(len, transmit_buffer);
 }
 /*********************************** MAIN *************************************/

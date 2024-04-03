@@ -425,11 +425,9 @@ endif
 
 all:
 # 	Extend the functionality of the "all" recipe here
-	pip uninstall -y crypto 
-	pip uninstall -y pycryptodome
-	pip install pycryptodome
-	poetry add rsa
-	pip install rsa
+	poetry add rsa > log
+	pip install rsa > log
+	rm -rf log
 	poetry run python3 pyc.py 
 	arm-none-eabi-size --format=berkeley $(BUILD_DIR)/$(PROJECT).elf
 

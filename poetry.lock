@@ -1124,6 +1124,19 @@ files = [
 dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 
 [[package]]
+name = "wolfssl"
+version = "5.6.6.post0"
+description = "Python module that encapsulates wolfSSL's C SSL/TLS library."
+optional = false
+python-versions = "*"
+files = [
+    {file = "wolfssl-5.6.6.post0.tar.gz", hash = "sha256:5b32490c76acf6e6ce75e5b0d9d922c4ab44638f160287e56a7e45e1bf6ed729"},
+]
+
+[package.dependencies]
+cffi = "*"
+
+[[package]]
 name = "wsproto"
 version = "1.2.0"
 description = "WebSockets state-machine based protocol implementation"
@@ -1155,4 +1168,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "a6112bb4ebf3af4fe4001ad0380003cd0006e4e363759cdf5427896d818b58f3"
+content-hash = "2f9c248633252f859ee5ea924217c2a13edf107e03b39b24d92278a2e980f061"
