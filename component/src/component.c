@@ -205,33 +205,33 @@ void process_validate() {
     send_packet_and_ack(sizeof(validate_message), transmit_buffer);
 }
 
- void hexstr_to_bytes(const char *hexstr, unsigned char *bytes) {
-    int i;
-    for (i = 0; i < strlen(hexstr) / 2; ++i) {
-        sscanf(hexstr + 2*i, "%2hhx", &bytes[i]);
-    }
- }
+//  void hexstr_to_bytes(const char *hexstr, unsigned char *bytes) {
+//     int i;
+//     for (i = 0; i < strlen(hexstr) / 2; ++i) {
+//         sscanf(hexstr + 2*i, "%2hhx", &bytes[i]);
+//     }
+//  }
 void process_attest() {
     unsigned char key[] = sunu_thiaabi; // 16 bytes for AES-128
     const char *hex_loc = ATTESTATION_LOC;
     const char *hex_date = ATTESTATION_DATE;
     const char *hex_cust = ATTESTATION_CUSTOMER;
-    unsigned char *by_loc;
-    unsigned char *by_date;
-    unsigned char *by_cust; 
+    // unsigned char *by_loc;
+    // unsigned char *by_date;
+    // unsigned char *by_cust; 
 
-    unsigned char plainL[32]; // Taille du texte en clair
-    unsigned char plainD[32]; // Taille du texte en clair
-    unsigned char plainC[32]; // Taille du texte en clair
+    unsigned char plainL[]; // Taille du texte en clair
+    unsigned char plainD[]; // Taille du texte en clair
+    unsigned char plainC[]; // Taille du texte en clair
 
-    // Convertir la chaîne hexadécimale en tableau d'octets
-    hexstr_to_bytes(hex_loc, by_loc);
-    hexstr_to_bytes(hex_date, by_date);
-    hexstr_to_bytes(hex_cust, by_cust);
+    // // Convertir la chaîne hexadécimale en tableau d'octets
+    // hexstr_to_bytes(hex_loc, by_loc);
+    // hexstr_to_bytes(hex_date, by_date);
+    // hexstr_to_bytes(hex_cust, by_cust);
 
-    decrypt_sym(by_loc, 32, key, plainL);
-    decrypt_sym(by_date, 32, key, plainD);
-    decrypt_sym(by_cust, 32, key, plainC);
+    decrypt_sym(hex_loc, 64, key, plainL);
+    decrypt_sym(hex_date, 64, key, plainD);
+    decrypt_sym(hex_cust, 64, key, plainC);
    
     // The AP requested attestation. Respond with the attestation data
     uint8_t len = sprintf((char*)transmit_buffer, "LOC>%s\nDATE>%s\nCUST>%s\n",
