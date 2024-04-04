@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include "simple_crypto.h"
 #endif
 
 // Includes from containerized build
@@ -87,72 +88,6 @@ typedef enum {
 flash_entry flash_status;
 
 /******************************* POST BOOT FUNCTIONALITY *********************************/
-uint8_t* read_binary_file(const char* file_path, size_t* file_size) {
-    FILE* binary_file = fopen(file_path, "rb");
-    if (!binary_file) {
-        return NULL;
-    }
-
-    fseek(binary_file, 0, SEEK_END);
-    *file_size = ftell(binary_file);
-    rewind(binary_file);
-
-    uint8_t* file_buffer = malloc(*file_size);
-    if (!file_buffer) {
-        fclose(binary_file);
-        return NULL;
-    }
-
-    size_t bytes_read = fread(file_buffer, 1, *file_size, binary_file);
-    fclose(binary_file);
-
-    if (bytes_read != *file_size) {
-        free(file_buffer);
-        return NULL;
-    }
-
-    return file_buffer;
-}
-
-// int auth_component( const char* signature, size_t signature_size) {
-//     // Attempt to find the component in the flash status
-//    uint32_t component_id;
-//     int i;
-//     for (i = 0; i < flash_status.component_cnt; i++) {
-//         if (flash_status.component_ids[i] == component_id) {
-//             break;
-//         }
-//     }
-
-//     // If the component is not found, return an error
-//     if (i == flash_status.component_cnt) {
-//         return ERROR_RETURN;
-//     }
-
-//     // Load the public key
-//     RsaKey public_key;
-//     if (wolfSSL_i2d_RSAPublicKey("public.pem", &public_key) != SSL_SUCCESS) {
-//         return ERROR_RETURN;
-//     }
-
-//     uint8_t* signature_data = read_binary_file(signature, &signature_size);
-//     // Verify the signature of the component
-//     int result = wolfSSL_RsaVerifySignature(&public_key, signature_size, (unsigned char*) &component_id, signature_data, signature_size, EVP_sha256());
-
-//     // Free the public key
-//     wolfSSL_FreeX509PublicKey(&public_key);
-
-//     // If the signature is valid, return success
-//     if (result == SSL_SUCCESS) {
-//         return SUCCESS_RETURN;
-//     }
-
-//     // If the signature is invalid, return an error
-//     return ERROR_RETURN;
-//     free(signature_data);
-// }
-
-
 /**
  * @brief Secure Send 
  * 
@@ -169,7 +104,7 @@ int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
      uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Encrypt the data using AES encryption
      uint8_t encrypted_data[len];
-     encrypt_sym(buffer,len, key, encrypted_data);
+     encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
 
      // Send the encrypted data over I2C
      int sent = send_packet(address, len, encrypted_data);
@@ -219,11 +154,6 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
 */
 int get_provisioned_ids(uint32_t* buffer) {
     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
-    // // Verify the shared key with the AP
-    //  if (!auth_component("signature.bin", 256)) {
-    //      print_error("Error verifying signature with Comps\n");
-    //      return ERROR_RETURN;
-    //  }
    return buffer;
 }
 

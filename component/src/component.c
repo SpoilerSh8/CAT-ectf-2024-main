@@ -2,7 +2,7 @@
 #include "i2c.h"
 #include "led.h"
 #include "mxc_delay.h"
-#include "mx_boot.h"
+#include "simple_i2c.h"
 #include "mxc_errors.h"
 #include "nvic_table.h"
 #include <stdio.h>
@@ -25,6 +25,7 @@
 #ifdef POST_BOOT
 #include "led.h"
 #include <stdint.h>
+#include "simple_crypto.h"
 #include <stdio.h>
 #include <string.h>
 #endif
@@ -82,7 +83,7 @@ void secure_send(uint8_t* buffer, uint8_t len) {
      uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Encrypt the data using AES encryption
      uint8_t encrypted_data[len];
-     encrypt_sym(buffer,len, key, encrypted_data);
+     encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
 
      // Send the encrypted data over I2C 
     send_packet_and_ack(len, encrypted_data); 
@@ -108,11 +109,11 @@ int secure_receive(uint8_t* buffer) {
      }
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,AES_BLOCK_SIZE, key, decrypted_data);
+     decrypt_sym(buffer,BLOCK_SIZE, key, decrypted_data);
 
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
-     return received;
+     return buffer;
 }
 /******************************* FUNCTION DEFINITIONS *********************************/
  // Example boot sequence for a device that needs to communicate with another device
