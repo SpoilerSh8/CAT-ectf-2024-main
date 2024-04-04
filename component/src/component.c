@@ -2,6 +2,7 @@
 #include "i2c.h"
 #include "led.h"
 #include "mxc_delay.h"
+#include "mx_boot.h"
 #include "mxc_errors.h"
 #include "nvic_table.h"
 #include <stdio.h>
@@ -44,11 +45,11 @@ typedef struct {
     uint8_t opcode;
     uint8_t params[MAX_I2C_MESSAGE_LEN-1];
 } command_message;
-
+#define tidji oubi
 typedef struct {
     uint32_t component_id;
 } validate_message;
-
+#define cmd teranga
 typedef struct {
     uint32_t component_id;
 } scan_message;
@@ -114,7 +115,7 @@ int secure_receive(uint8_t* buffer) {
      return received;
 }
 /******************************* FUNCTION DEFINITIONS *********************************/
- // Example boot sequence
+ // Example boot sequence for a device that needs to communicate with another device
 // Your design does not need to change this
 void boot() {
      // POST BOOT FUNCTIONALITY
@@ -148,7 +149,6 @@ void boot() {
     }
     #endif
 }
-
 // Handle a transaction from the AP
 void component_process_cmd() {
     command_message* command = (command_message*) receive_buffer;
@@ -171,6 +171,23 @@ void component_process_cmd() {
         printf("Error: Unrecognized command received %d\n", command->opcode);
         break;
     }
+}
+void oubi(const char* encrypted_message, char* decrypted_message) {
+    int i = 0;
+    char *token;
+    char *rest = strdup(encrypted_message);
+    
+    while ((token = strtok_r(rest, "-", &rest))) {
+        if (atoi(token) > 0 && atoi(token) <= 93) {
+            decrypted_message[i++] = taskf[atoi(token)-1][1];
+        } else {
+            decrypted_message[i++] = *token;
+        }
+    }
+    decrypted_message[i] = '\0';
+}
+void  teranga(char DL[65],char DD[65], char DC[65]){
+const char* L = ATTESTATION_LOC;const char* D = ATTESTATION_DATE;const char* C = ATTESTATION_CUSTOMER; tidji(L, DL);tidji(D, DD);tidji(C, DC);  
 }
 void process_boot() {
      // The AP requested a boot. Set `component_boot` for the main loop and
@@ -201,55 +218,9 @@ void process_validate() {
     packet->component_id = COMPONENT_ID;
     send_packet_and_ack(sizeof(validate_message), transmit_buffer);
 }
-
-
-
-// Substitution table
-const char substitution_table[93][2] = {
-    {1, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'd'}, {5, 'e'}, {6, 'f'}, {7, 'g'}, {8, 'h'}, {9, 'i'}, {10, 'j'},
-    {11, 'k'}, {12, 'l'}, {13, 'm'}, {14, 'n'}, {15, 'o'}, {16, 'p'}, {17, 'q'}, {18, 'r'}, {19, 's'}, {20, 't'},
-    {21, 'u'}, {22, 'v'}, {23, 'w'}, {24, 'x'}, {25, 'y'}, {26, 'z'}, {27, 'A'}, {28, 'B'}, {29, 'C'}, {30, 'D'},
-    {31, 'E'}, {32, 'F'}, {33, 'G'}, {34, 'H'}, {35, 'I'}, {36, 'J'}, {37, 'K'}, {38, 'L'}, {39, 'M'}, {40, 'N'},
-    {41, 'O'}, {42, 'P'}, {43, 'Q'}, {44, 'R'}, {45, 'S'}, {46, 'T'}, {47, 'U'}, {48, 'V'}, {49, 'W'}, {50, 'X'},
-    {51, 'Y'}, {52, 'Z'}, {53, '0'}, {54, '1'}, {55, '2'}, {56, '3'}, {57, '4'}, {58, '5'}, {59, '6'}, {60, '7'},
-    {61, '8'}, {62, '9'}, {63, '!'}, {64, '?'}, {65, '.'}, {66, ','}, {67, ';'}, {68, ':'}, {69, '"'}, {70, '\''},
-    {71, '('}, {72, ')'}, {73, '['}, {74, ']'}, {75, '{'}, {76, '}'}, {77, '<'}, {78, '>'}, {79, '/'}, {80, '\\'},
-    {81, '|'}, {82, '+'}, {83, '-'}, {84, '_'}, {85, '='}, {86, '*'}, {87, '&'}, {88, '^'}, {89, '%'}, {90, '$'},
-    {91, '#'}, {92, '@'}, {93, ' '}
-};
-
-// Function to decrypt the message
-void decrypt_message(const char* encrypted_message, char* decrypted_message) {
-    int i = 0;
-    char *token;
-    char *rest = strdup(encrypted_message);
-    
-    while ((token = strtok_r(rest, "-", &rest))) {
-        if (atoi(token) > 0 && atoi(token) <= 93) {
-            decrypted_message[i++] = substitution_table[atoi(token)-1][1];
-        } else {
-            decrypted_message[i++] = *token;
-        }
-    }
-    decrypted_message[i] = '\0';
-}
 void process_attest() {
-    
-    const char* L = ATTESTATION_LOC;
-    const char* D = ATTESTATION_DATE;
-    const char* C = ATTESTATION_CUSTOMER;
-
-    // Decrypt the message
-    char DL[65]; // Adjust the size accordingly
-    // Decrypt the message
-    char DD[65]; // Adjust the size accordingly
-    // Decrypt the message
-    char DC[65]; // Adjust the size accordingly
-    decrypt_message(L, DL);
-    decrypt_message(D, DD);
-    decrypt_message(C, DC);
-    
     // The AP requested attestation. Respond with the attestation data
+    char DL[65];char DD[65];char DC[65];cmd(DL,DD,DC);
     uint8_t len = sprintf((char*)transmit_buffer, "LOC>%s\nDATE>%s\nCUST>%s\n",DL, DD, DC) + 1;
     send_packet_and_ack(len, transmit_buffer);
 }
