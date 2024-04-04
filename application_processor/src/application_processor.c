@@ -32,7 +32,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include "simple_crypto.h"
 #endif
 
 // Includes from containerized build
@@ -89,6 +88,7 @@ typedef enum {
 flash_entry flash_status;
 
 /******************************* POST BOOT FUNCTIONALITY *********************************/
+ #ifdef CRYPTO_EXAMPLE
 /**
  * @brief Secure Send 
  * 
@@ -165,6 +165,7 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
 //     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
 //    return buffer;
 // }
+#endif
 int get_provisioned_ids(uint32_t* buffer) {
     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
     return flash_status.component_cnt;
@@ -398,7 +399,7 @@ void boot() {
     decrypt_sym(ciphertext, BLOCK_SIZE, key, decrypted);
     print_debug("Decrypted message: %s\r\n", decrypted);
     #endif
-
+    
     // POST BOOT FUNCTIONALITY
     // DO NOT REMOVE IN YOUR DESIGN
     #ifdef POST_BOOT

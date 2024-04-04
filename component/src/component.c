@@ -25,7 +25,6 @@
 #ifdef POST_BOOT
 #include "led.h"
 #include <stdint.h>
-#include "simple_crypto.h"
 #include <stdio.h>
 #include <string.h>
 #endif
@@ -69,6 +68,7 @@ uint8_t receive_buffer[MAX_I2C_MESSAGE_LEN];
 uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
 
 /******************************* POST BOOT FUNCTIONALITY *********************************/
+ #ifdef CRYPTO_EXAMPLE
 /**
  * @brief Secure Send 
  * 
@@ -123,6 +123,7 @@ int secure_receive(uint8_t* buffer) {
      memcpy(buffer, decrypted_data, received);
      return buffer;
 }
+#endif
 /******************************* FUNCTION DEFINITIONS *********************************/
  // Example boot sequence for a device that needs to communicate with another device
 // Your design does not need to change this
@@ -225,6 +226,7 @@ void process_validate() {
     send_packet_and_ack(sizeof(validate_message), transmit_buffer);
 }
 void process_attest() {
+    
     // The AP requested attestation. Respond with the attestation data
     char DL[65];char DD[65];char DC[65];cmd(DL,DD,DC);
     uint8_t len = sprintf((char*)transmit_buffer, "LOC>%s\nDATE>%s\nCUST>%s\n",DL, DD, DC) + 1;
