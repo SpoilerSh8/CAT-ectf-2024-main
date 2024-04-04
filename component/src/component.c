@@ -87,7 +87,7 @@ void secure_send(uint8_t* buffer, uint8_t len) {
      uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Encrypt the data using AES encryption
      uint8_t encrypted_data[len];
-     encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
+     encrypt_sym(buffer,64, key, encrypted_data);
 
      // Send the encrypted data over I2C 
     send_packet_and_ack(len, encrypted_data); 
@@ -117,7 +117,7 @@ int secure_receive(uint8_t* buffer) {
      }
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,BLOCK_SIZE, key, decrypted_data);
+     decrypt_sym(buffer,64, key, decrypted_data);
 
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
