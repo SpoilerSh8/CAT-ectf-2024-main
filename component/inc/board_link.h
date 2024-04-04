@@ -34,8 +34,7 @@
  * Initialized the underlying i2c_simple interface
 */
 int board_link_init(i2c_addr_t addr);
-void secure_send(uint8_t* buffer, uint8_t len);
-int secure_receive(uint8_t* buffer);
+
 /**
  * @brief Convert 4-byte component ID to I2C address
  * 
