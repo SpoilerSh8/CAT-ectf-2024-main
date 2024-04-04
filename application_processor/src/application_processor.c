@@ -189,7 +189,7 @@ int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
  * Securely receive data over I2C. This function is utilized in POST_BOOT functionality.
  * This function must be implemented by your team to align with the security requirements.
 */
-int secure_receive(i2c_addr_t address, uint8_t* buffer, uint8_t len) {
+int secure_receive(i2c_addr_t address, uint8_t* buffer) {
     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Receive the encrypted data over I2C
      int received = poll_and_receive_packet(address, buffer);
@@ -200,7 +200,7 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer, uint8_t len) {
 
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,len, key, decrypted_data);
+     decrypt_sym(buffer,AES_BLOCK_SIZE, key, decrypted_data);
 
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
