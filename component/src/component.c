@@ -79,7 +79,7 @@ uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
 */
 void secure_send(uint8_t* buffer, uint8_t len) {
      // Generate a random encryption key
-     uint8_t key[16]=sunu_thiaabi;
+     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Encrypt the data using AES encryption
      uint8_t encrypted_data[len];
      encrypt_sym(buffer,len, key, encrypted_data);
@@ -99,16 +99,16 @@ void secure_send(uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 int secure_receive(uint8_t* buffer) {
-    uint8_t key[17]=sunu_thiaabi;
+    uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Receive the encrypted data over I2C
      int received = wait_and_receive_packet(buffer);
      if (received == ERROR_RETURN) {
-         //print_error("Error receiving data over I2C: %d\n", received);
+         print_error("Error receiving data over I2C: %d\n", received);
          return ERROR_RETURN;
      }
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,16, key, decrypted_data);
+     decrypt_sym(buffer,AES_BLOCK_SIZE, key, decrypted_data);
 
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
@@ -122,10 +122,6 @@ void boot() {
     // DO NOT REMOVE IN YOUR DESIGN
     #ifdef POST_BOOT
         POST_BOOT
-        uint8_t* buffer;
-        uint8_t len;
-        secure_send(buffer,len);
-        secure_receive(buffer);
     #else
      // Anything after this macro can be changed by your design
     // but will not be run on provisioned systems

@@ -460,7 +460,7 @@ void boot() {
     // POST BOOT FUNCTIONALITY
     // DO NOT REMOVE IN YOUR DESIGN
     #ifdef POST_BOOT
-        POST_BOOT
+        POST_BOOT   
     #else
     // Everything after this point is modifiable in your design
     // LED loop to show that boot occurred
