@@ -3,7 +3,7 @@
 #include "simple_crypto.h"
 #include <stdint.h>
 #include <string.h>
-#include "cat.h"
+
 
 /******************************** FUNCTION PROTOTYPES ********************************/
 /** @brief Encrypts plaintext using a symmetric cipher

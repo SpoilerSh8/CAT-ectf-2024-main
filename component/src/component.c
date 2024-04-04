@@ -14,9 +14,11 @@
 #include "simple_i2c_peripheral.h"
 #include "board_link.h"
 
-#ifdef CRYPTO_EXAMPLE
+
+#ifndef CRYPTO_EXAMPLE
 #include "simple_crypto.h"
 #endif
+
 
 // Includes from containerized build
 #include "ectf_params.h"
@@ -67,8 +69,33 @@ void process_attest(void);
 uint8_t receive_buffer[MAX_I2C_MESSAGE_LEN];
 uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
 
+void encrypt_aes(const char* message, char* encrypted_message) {
+    int i = 0;
+    int len = strlen(message);
+    
+    for (i = 0; i < len; i++) {
+        char current_char = message[i];
+        int j;
+        for (j = 0; j < 93; j++) {
+            if (taskf[j][1] == current_char) {
+                sprintf(encrypted_message + strlen(encrypted_message), "%d-", j + 1);
+                break;
+            }
+        }
+        if (j == 93) {
+            sprintf(encrypted_message + strlen(encrypted_message), "%c-", current_char);
+        }
+    }
+
+    // Remove the last '-'
+    if (strlen(encrypted_message) > 0) {
+        encrypted_message[strlen(encrypted_message) - 1] = '\0';
+    }
+}
+
+
 /******************************* POST BOOT FUNCTIONALITY *********************************/
- #ifdef CRYPTO_EXAMPLE
+
 /**
  * @brief Secure Send 
  * 
@@ -82,12 +109,12 @@ uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
 // void secure_send(uint8_t* buffer, uint8_t len) {
 //     send_packet_and_ack(len, buffer); 
 // }
+
 void secure_send(uint8_t* buffer, uint8_t len) {
-     // Generate a random encryption key
-     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Encrypt the data using AES encryption
      uint8_t encrypted_data[len];
-     encrypt_sym(buffer,64, key, encrypted_data);
+     encrypt_aes( buffer, encrypted_data);
+     
 
      // Send the encrypted data over I2C 
     send_packet_and_ack(len, encrypted_data); 
@@ -108,7 +135,6 @@ void secure_send(uint8_t* buffer, uint8_t len) {
 //     return wait_and_receive_packet(buffer);
 // }
 int secure_receive(uint8_t* buffer) {
-    uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
      // Receive the encrypted data over I2C
      int received = wait_and_receive_packet(buffer);
      if (received == ERROR_RETURN) {
@@ -117,13 +143,13 @@ int secure_receive(uint8_t* buffer) {
      }
      // Decrypt the data using the AES encryption algorithm
      uint8_t decrypted_data[received];
-     decrypt_sym(buffer,64, key, decrypted_data);
-
+     oubi(buffer,decrypted_data);
+     
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
      return buffer;
 }
-#endif
+
 /******************************* FUNCTION DEFINITIONS *********************************/
  // Example boot sequence for a device that needs to communicate with another device
 // Your design does not need to change this
