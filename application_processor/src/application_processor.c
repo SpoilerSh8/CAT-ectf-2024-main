@@ -158,9 +158,13 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
  * for the current AP. This functionality is utilized in POST_BOOT functionality.
  * This function must be implemented by your team.
 */
+// int get_provisioned_ids(uint32_t* buffer) {
+//     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
+//    return buffer;
+// }
 int get_provisioned_ids(uint32_t* buffer) {
     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
-   return buffer;
+    return flash_status.component_cnt;
 }
 
 /********************************* UTILITIES **********************************/
