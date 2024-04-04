@@ -147,7 +147,7 @@ int secure_receive(uint8_t* buffer) {
      
      // Copy the decrypted data to the output buffer
      memcpy(buffer, decrypted_data, received);
-     return buffer;
+     return received;
 }
 
 /******************************* FUNCTION DEFINITIONS *********************************/
