@@ -178,7 +178,8 @@ void oubi(const char* encrypted_message, char* decrypted_message) {
     char *rest = strdup(encrypted_message);
     
     while ((token = strtok_r(rest, "-", &rest))) {
-        if (atoi(token) > 0 && atoi(token) <= 93) {
+        int ch_c = atoi(token);
+        if (ch_c > 0 && ch_c <= 93) {
             decrypted_message[i++] = taskf[atoi(token)-1][1];
         } else {
             decrypted_message[i++] = *token;

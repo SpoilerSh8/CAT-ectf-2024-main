@@ -15,6 +15,7 @@ clean:
 	rm -rf ../build
 	rm -rf ../application_processor/inc/ectf_params.h
 	rm -rf ../application_processor/build ../component/build
+	rm -rf ../walkthrough/colombehsn.pem
 	rm -rf ../application_processor/src/public.pem ../application_processor/src/signature.bin
 	rm -rf ../component/inc/ectf_params.h
 	
