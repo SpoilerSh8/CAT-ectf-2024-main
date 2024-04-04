@@ -30,7 +30,6 @@
 #include "mxc_delay.h"
 #include <stdint.h>
 #include <string.h>
-#include <post_boot.h>
 #include <stdio.h>
 #endif
 
