@@ -79,15 +79,18 @@ uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
  * This function must be implemented by your team to align with the security requirements.
 */
 void secure_send(uint8_t* buffer, uint8_t len) {
-     // Generate a random encryption key
-     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
-     // Encrypt the data using AES encryption
-     uint8_t encrypted_data[len];
-     encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
-
-     // Send the encrypted data over I2C 
-    send_packet_and_ack(len, encrypted_data); 
+    send_packet_and_ack(len, buffer); 
 }
+// void secure_send(uint8_t* buffer, uint8_t len) {
+//      // Generate a random encryption key
+//      uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
+//      // Encrypt the data using AES encryption
+//      uint8_t encrypted_data[len];
+//      encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
+
+//      // Send the encrypted data over I2C 
+//     send_packet_and_ack(len, encrypted_data); 
+// }
 
 /**
  * @brief Secure Receive
@@ -100,21 +103,24 @@ void secure_send(uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 int secure_receive(uint8_t* buffer) {
-    uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
-     // Receive the encrypted data over I2C
-     int received = wait_and_receive_packet(buffer);
-     if (received == ERROR_RETURN) {
-         print_error("Error receiving data over I2C: %d\n", received);
-         return ERROR_RETURN;
-     }
-     // Decrypt the data using the AES encryption algorithm
-     uint8_t decrypted_data[received];
-     decrypt_sym(buffer,BLOCK_SIZE, key, decrypted_data);
-
-     // Copy the decrypted data to the output buffer
-     memcpy(buffer, decrypted_data, received);
-     return buffer;
+    return wait_and_receive_packet(buffer);
 }
+// int secure_receive(uint8_t* buffer) {
+//     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
+//      // Receive the encrypted data over I2C
+//      int received = wait_and_receive_packet(buffer);
+//      if (received == ERROR_RETURN) {
+//          print_error("Error receiving data over I2C: %d\n", received);
+//          return ERROR_RETURN;
+//      }
+//      // Decrypt the data using the AES encryption algorithm
+//      uint8_t decrypted_data[received];
+//      decrypt_sym(buffer,BLOCK_SIZE, key, decrypted_data);
+
+//      // Copy the decrypted data to the output buffer
+//      memcpy(buffer, decrypted_data, received);
+//      return buffer;
+// }
 /******************************* FUNCTION DEFINITIONS *********************************/
  // Example boot sequence for a device that needs to communicate with another device
 // Your design does not need to change this

@@ -100,19 +100,22 @@ flash_entry flash_status;
 
 */
 int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
-     // Generate a random encryption key
-     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
-     // Encrypt the data using AES encryption
-     uint8_t encrypted_data[len];
-     encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
-
-     // Send the encrypted data over I2C
-     int sent = send_packet(address, len, encrypted_data);
-     if (sent == ERROR_RETURN) {
-         print_error("Error sending data over I2C: %d\n", sent);
-     }
-     return sent;
+    return send_packet(address, len, buffer);
 }
+// int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
+//      // Generate a random encryption key
+//      uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
+//      // Encrypt the data using AES encryption
+//      uint8_t encrypted_data[len];
+//      encrypt_sym(buffer,BLOCK_SIZE, key, encrypted_data);
+
+//      // Send the encrypted data over I2C
+//      int sent = send_packet(address, len, encrypted_data);
+//      if (sent == ERROR_RETURN) {
+//          print_error("Error sending data over I2C: %d\n", sent);
+//      }
+//      return sent;
+// }
 /**
  * @brief Secure Receive
  * 
@@ -125,22 +128,25 @@ int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 int secure_receive(i2c_addr_t address, uint8_t* buffer) {
-    uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
-     // Receive the encrypted data over I2C
-     int received = poll_and_receive_packet(address, buffer);
-     if (received == ERROR_RETURN) {
-         print_error("Error receiving data over I2C: %d\n", received);
-         return ERROR_RETURN;
-     }
-
-     // Decrypt the data using the AES encryption algorithm
-     uint8_t decrypted_data[received];
-     decrypt_sym(buffer,AES_BLOCK_SIZE, key, decrypted_data);
-
-     // Copy the decrypted data to the output buffer
-     memcpy(buffer, decrypted_data, received);
-     return received;
+    return poll_and_receive_packet(address, buffer);
 }
+// int secure_receive(i2c_addr_t address, uint8_t* buffer) {
+//     uint8_t key[AES_BLOCK_SIZE]=sunu_thiaabi;
+//      // Receive the encrypted data over I2C
+//      int received = poll_and_receive_packet(address, buffer);
+//      if (received == ERROR_RETURN) {
+//          print_error("Error receiving data over I2C: %d\n", received);
+//          return ERROR_RETURN;
+//      }
+
+//      // Decrypt the data using the AES encryption algorithm
+//      uint8_t decrypted_data[received];
+//      decrypt_sym(buffer,AES_BLOCK_SIZE, key, decrypted_data);
+
+//      // Copy the decrypted data to the output buffer
+//      memcpy(buffer, decrypted_data, received);
+//      return received;
+// }
 /**
  * @brief Get Provisioned IDs
  * 
