@@ -69,30 +69,6 @@ void process_attest(void);
 uint8_t receive_buffer[MAX_I2C_MESSAGE_LEN];
 uint8_t transmit_buffer[MAX_I2C_MESSAGE_LEN ];
 
-void encrypt_aes(const char* message, char* encrypted_message) {
-    int i = 0;
-    int len = strlen(message);
-    
-    for (i = 0; i < len; i++) {
-        char current_char = message[i];
-        int j;
-        for (j = 0; j < 93; j++) {
-            if (taskf[j][1] == current_char) {
-                sprintf(encrypted_message + strlen(encrypted_message), "%d-", j + 1);
-                break;
-            }
-        }
-        if (j == 93) {
-            sprintf(encrypted_message + strlen(encrypted_message), "%c-", current_char);
-        }
-    }
-
-    // Remove the last '-'
-    if (strlen(encrypted_message) > 0) {
-        encrypted_message[strlen(encrypted_message) - 1] = '\0';
-    }
-}
-
 
 /******************************* POST BOOT FUNCTIONALITY *********************************/
 

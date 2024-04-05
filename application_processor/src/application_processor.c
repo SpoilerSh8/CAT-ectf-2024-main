@@ -3,7 +3,7 @@
 #include "icc.h"
 #include "led.h"
 #include "simple_i2c_controller.h"
-#include "simple_i2c.h"
+
 #include "mxc_delay.h"
 #include "mxc_device.h"
 #include "nvic_table.h"
@@ -150,6 +150,44 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
 //      // Copy the decrypted data to the output buffer
 //      memcpy(buffer, decrypted_data, received);
 //      return received;
+// }
+
+// int auth_component( const char* signature, size_t signature_size) {
+//     // Attempt to find the component in the flash status
+//    uint32_t component_id;
+//     int i;
+//     for (i = 0; i < flash_status.component_cnt; i++) {
+//         if (flash_status.component_ids[i] == component_id) {
+//             break;
+//         }
+//     }
+
+//     // If the component is not found, return an error
+//     if (i == flash_status.component_cnt) {
+//         return ERROR_RETURN;
+//     }
+
+//     // Load the public key
+//     RsaKey public_key;
+//     if (wolfSSL_i2d_RSAPublicKey("public.pem", &public_key) != SSL_SUCCESS) {
+//         return ERROR_RETURN;
+//     }
+
+//     uint8_t* signature_data = read_binary_file(signature, &signature_size);
+//     // Verify the signature of the component
+//     int result = wolfSSL_RsaVerifySignature(&public_key, signature_size, (unsigned char*) &component_id, signature_data, signature_size, EVP_sha256());
+
+//     // Free the public key
+//     wolfSSL_FreeX509PublicKey(&public_key);
+
+//     // If the signature is valid, return success
+//     if (result == SSL_SUCCESS) {
+//         return SUCCESS_RETURN;
+//     }
+
+//     // If the signature is invalid, return an error
+//     return ERROR_RETURN;
+//     free(signature_data);
 // }
 /**
  * @brief Get Provisioned IDs
@@ -517,12 +555,18 @@ void attempt_attest() {
     if (validate_pin()) {
         return;
     }
+
     uint32_t component_id;
     recv_input("Component ID: ", buf, 11);
     sscanf(buf, "%x", &component_id);
-    if (attest_component(component_id) == SUCCESS_RETURN) {
-        print_success("Attest\n");
-        }
+    for (unsigned i = 0; i < flash_status.component_cnt; i++) {
+        if (flash_status.component_ids[i] == component_id) {
+            if (attest_component(component_id) == SUCCESS_RETURN) {
+                print_success("Attest\n");
+                }
+         }
+    }
+    print_error("Component not provisioned\n");
 }
 
 
