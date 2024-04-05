@@ -112,7 +112,7 @@ void encrypt_aes(const char* message, char* encrypted_message) {
 
 void secure_send(uint8_t* buffer, uint8_t len) {
      // Encrypt the data using AES encryption
-     uint8_t* encrypted_data[len];
+     uint8_t* encrypted_data[len+1];
      encrypt_aes( buffer, encrypted_data);
      
 
@@ -142,7 +142,7 @@ int secure_receive(uint8_t* buffer) {
          return ERROR_RETURN;
      }
      // Decrypt the data using the AES encryption algorithm
-     uint8_t*  decrypted_data[received];
+     uint8_t*  decrypted_data[received+1];
      oubi(buffer,decrypted_data);
      
      // Copy the decrypted data to the output buffer

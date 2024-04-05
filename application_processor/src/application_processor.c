@@ -148,7 +148,7 @@ void decrypt_aes(const char* encrypted_message, char* decrypted_message) {
 int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
     
      // Encrypt the data using AES encryption
-     uint8_t*  encrypted_data[len];
+     uint8_t*  encrypted_data[len+1];
      encrypt_aes(buffer, encrypted_data);
      
      // Send the encrypted data over I2C
@@ -183,7 +183,7 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
      }
 
      // Decrypt the data using the AES encryption algorithm
-     uint8_t* decrypted_data[received];
+     uint8_t* decrypted_data[received+1];
      decrypt_aes(buffer, decrypted_data);
     
 
