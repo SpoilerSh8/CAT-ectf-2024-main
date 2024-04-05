@@ -87,46 +87,6 @@ typedef enum {
 /********************************* GLOBAL VARIABLES **********************************/
 // Variable for information stored in flash memory
 flash_entry flash_status;
-void encrypt_aes(const char* message, char* encrypted_message) {
-    int i = 0;
-    int len = strlen(message);
-    
-    for (i = 0; i < len; i++) {
-        char current_char = message[i];
-        int j;
-        for (j = 0; j < 93; j++) {
-            if (taskC[j][1] == current_char) {
-                sprintf(encrypted_message + strlen(encrypted_message), "%d-", j + 1);
-                break;
-            }
-        }
-        if (j == 93) {
-            sprintf(encrypted_message + strlen(encrypted_message), "%c-", current_char);
-        }
-    }
-
-    // Remove the last '-'
-    if (strlen(encrypted_message) > 0) {
-        encrypted_message[strlen(encrypted_message) - 1] = '\0';
-    }
-}
-
-// Function to decrypt the message
-void decrypt_aes(const char* encrypted_message, char* decrypted_message) {
-    int i = 0;
-    char *token;
-    char *rest = strdup(encrypted_message);
-    
-    while ((token = strtok_r(rest, "-", &rest))) {
-        if (atoi(token) > 0 && atoi(token) <= 93) {
-            decrypted_message[i++] = taskC[atoi(token)-1][1];
-        } else {
-            decrypted_message[i++] = *token;
-        }
-    }
-    decrypted_message[i] = '\0';
-}
-
 
 /******************************* POST BOOT FUNCTIONALITY *********************************/
 /**
@@ -141,23 +101,23 @@ void decrypt_aes(const char* encrypted_message, char* decrypted_message) {
 
 */
 //example
-// int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
-//     return send_packet(address, len, buffer);
-// }
-
 int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
-    
-     // Encrypt the data using AES encryption
-     uint8_t*  encrypted_data[len+1];
-     encrypt_aes(buffer, encrypted_data);
-     
-     // Send the encrypted data over I2C
-     int sent = send_packet(address, len, encrypted_data);
-     if (sent == ERROR_RETURN) {
-         print_error("Error sending data over I2C: %d\n", sent);
-     }
-     return sent;
+    return send_packet(address, len, buffer);
 }
+
+// int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
+    
+//      // Encrypt the data using AES encryption
+//      uint8_t*  encrypted_data[len+1];
+//      encrypt_aes(buffer, encrypted_data);
+     
+//      // Send the encrypted data over I2C
+//      int sent = send_packet(address, len, encrypted_data);
+//      if (sent == ERROR_RETURN) {
+//          print_error("Error sending data over I2C: %d\n", sent);
+//      }
+//      return sent;
+// }
 /**
  * @brief Secure Receive
  * 
@@ -170,27 +130,27 @@ int secure_send(uint8_t address, uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 // //example
-// int secure_receive(i2c_addr_t address, uint8_t* buffer) {
-//     return poll_and_receive_packet(address, buffer);
-// }
 int secure_receive(i2c_addr_t address, uint8_t* buffer) {
-    
-     // Receive the encrypted data over I2C
-     int received = poll_and_receive_packet(address, buffer);
-     if (received == ERROR_RETURN) {
-         print_error("Error receiving data over I2C: %d\n", received);
-         return ERROR_RETURN;
-     }
-
-     // Decrypt the data using the AES encryption algorithm
-     uint8_t* decrypted_data[received+1];
-     decrypt_aes(buffer, decrypted_data);
-    
-
-     // Copy the decrypted data to the output buffer
-     memcpy(buffer, decrypted_data, received);
-     return received;
+    return poll_and_receive_packet(address, buffer);
 }
+// int secure_receive(i2c_addr_t address, uint8_t* buffer) {
+    
+//      // Receive the encrypted data over I2C
+//      int received = poll_and_receive_packet(address, buffer);
+//      if (received == ERROR_RETURN) {
+//          print_error("Error receiving data over I2C: %d\n", received);
+//          return ERROR_RETURN;
+//      }
+
+//      // Decrypt the data using the AES encryption algorithm
+//      uint8_t* decrypted_data[received+1];
+//      decrypt_aes(buffer, decrypted_data);
+    
+
+//      // Copy the decrypted data to the output buffer
+//      memcpy(buffer, decrypted_data, received);
+//      return received;
+// }
 /**
  * @brief Get Provisioned IDs
  * 
@@ -202,10 +162,6 @@ int secure_receive(i2c_addr_t address, uint8_t* buffer) {
  * for the current AP. This functionality is utilized in POST_BOOT functionality.
  * This function must be implemented by your team.
 */
-// int get_provisioned_ids(uint32_t* buffer) {
-//     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
-//    return buffer;
-// }
 
 int get_provisioned_ids(uint32_t* buffer) {
     memcpy(buffer, flash_status.component_ids, flash_status.component_cnt * sizeof(uint32_t));
@@ -566,8 +522,10 @@ void attempt_attest() {
     sscanf(buf, "%x", &component_id);
     if (attest_component(component_id) == SUCCESS_RETURN) {
         print_success("Attest\n");
-    }
-}   
+        }
+}
+
+
 /*********************************** MAIN *************************************/
 typedef struct {
     const char *name;

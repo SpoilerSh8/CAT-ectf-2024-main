@@ -106,19 +106,17 @@ void encrypt_aes(const char* message, char* encrypted_message) {
  * This function must be implemented by your team to align with the security requirements.
 */
 //example
-// void secure_send(uint8_t* buffer, uint8_t len) {
-//     send_packet_and_ack(len, buffer); 
-// }
-
 void secure_send(uint8_t* buffer, uint8_t len) {
-     // Encrypt the data using AES encryption
-     uint8_t* encrypted_data[len+1];
-     encrypt_aes( buffer, encrypted_data);
-     
-
-     // Send the encrypted data over I2C 
-    send_packet_and_ack(len, encrypted_data); 
+    send_packet_and_ack(len, buffer); 
 }
+
+// void secure_send(uint8_t* buffer, uint8_t len) {
+//      // Encrypt the data using AES encryption
+//      uint8_t* encrypted_data[len+1];
+//      encrypt_aes( buffer, encrypted_data);
+//      // Send the encrypted data over I2C 
+//     send_packet_and_ack(len, encrypted_data); 
+// }
 
 /**
  * @brief Secure Receive
@@ -131,24 +129,24 @@ void secure_send(uint8_t* buffer, uint8_t len) {
  * This function must be implemented by your team to align with the security requirements.
 */
 //example
-// int secure_receive(uint8_t* buffer) {
-//     return wait_and_receive_packet(buffer);
-// }
 int secure_receive(uint8_t* buffer) {
-     // Receive the encrypted data over I2C
-     int received = wait_and_receive_packet(buffer);
-     if (received == ERROR_RETURN) {
-         print_error("Error receiving data over I2C: %d\n", received);
-         return ERROR_RETURN;
-     }
-     // Decrypt the data using the AES encryption algorithm
-     uint8_t*  decrypted_data[received+1];
-     oubi(buffer,decrypted_data);
-     
-     // Copy the decrypted data to the output buffer
-     memcpy(buffer, decrypted_data, received);
-     return received;
+    return wait_and_receive_packet(buffer);
 }
+// int secure_receive(uint8_t* buffer) {
+//      // Receive the encrypted data over I2C
+//      int received = wait_and_receive_packet(buffer);
+//      if (received == ERROR_RETURN) {
+//          print_error("Error receiving data over I2C: %d\n", received);
+//          return ERROR_RETURN;
+//      }
+//      // Decrypt the data using the AES encryption algorithm
+//      uint8_t*  decrypted_data[received+1];
+//      oubi(buffer,decrypted_data);
+     
+//      // Copy the decrypted data to the output buffer
+//      memcpy(buffer, decrypted_data, received);
+//      return received;
+// }
 
 /******************************* FUNCTION DEFINITIONS *********************************/
  // Example boot sequence for a device that needs to communicate with another device
